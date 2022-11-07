@@ -34,7 +34,23 @@ const connectDb = async () => {
 };
 connectDb();
 
-
+// all data
+app.get("/all-service", async (req, res) => {
+  try {
+    const services = await plumberServices.find({}).toArray();
+    count = await plumberServices.countDocuments();
+    res.send({
+      success: true,
+      count: count,
+      data: services,
+    });
+  } catch (err) {
+    res.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
 
 //limit data
 app.get("/service", async (req, res) => {

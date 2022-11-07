@@ -21,6 +21,8 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+const plumberServices = client.db("mrPlumber").collection("plumberServices");
+
 // connect DB
 const connectDb = async () => {
   try {
@@ -31,6 +33,24 @@ const connectDb = async () => {
   }
 };
 connectDb();
+
+
+
+//limit data
+app.get("/service", async (req, res) => {
+  try {
+    const services = await plumberServices.find({}).limit(3).toArray();
+    res.send({
+      success: true,
+      data: services,
+    });
+  } catch (err) {
+    res.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
 
 app.listen(port, () => {
   console.log("Mr. Plumber server is running on port", port);

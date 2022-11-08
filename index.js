@@ -73,7 +73,6 @@ app.get("/all-service/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const service = await plumberServices.findOne({ _id: ObjectId(id) });
-    console.log(service);
     res.send({
       success: true,
       data: service,
@@ -86,6 +85,15 @@ app.get("/all-service/:id", async (req, res) => {
   }
 });
 
+app.post("/add-service", async (req, res) => {
+  try {
+    const addedService = await plumberServices.insertOne(req.body);
+    console.log(addedService);
+    res.send(addedService);
+  } catch (err) {
+    console.log(err);
+  }
+});
 app.listen(port, () => {
   console.log("Mr. Plumber server is running on port", port);
 });

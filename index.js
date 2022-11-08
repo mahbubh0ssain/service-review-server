@@ -88,12 +88,51 @@ app.get("/all-service/:id", async (req, res) => {
 app.post("/add-service", async (req, res) => {
   try {
     const addedService = await plumberServices.insertOne(req.body);
-    console.log(addedService);
-    res.send(addedService);
+    if (addedService.acknowledged) {
+      res.send({
+        success: true,
+        data: addedService,
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "cant add new service",
+      });
+    }
   } catch (err) {
     console.log(err);
+    res.send({
+      success: false,
+      error: err.message,
+    });
   }
 });
+
+const plumberReviews = client.db("mrPlumber").collection("Reviews");
+
+app.post("/reviews", async (req, res) => {
+  try {
+    const reviews = await plumberReviews.insertOne(req.body);
+    if (reviews.acknowledged) {
+      res.send({
+        success: true,
+        data: reviews,
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Cant't add review",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.send({
+      success: true,
+      error: err.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("Mr. Plumber server is running on port", port);
 });

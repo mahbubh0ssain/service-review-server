@@ -85,6 +85,7 @@ app.get("/all-service/:id", async (req, res) => {
   }
 });
 
+//post services
 app.post("/add-service", async (req, res) => {
   try {
     const addedService = await plumberServices.insertOne(req.body);
@@ -110,6 +111,7 @@ app.post("/add-service", async (req, res) => {
 
 const plumberReviews = client.db("mrPlumber").collection("Reviews");
 
+//post reviews
 app.post("/reviews", async (req, res) => {
   try {
     const reviews = await plumberReviews.insertOne(req.body);
@@ -130,6 +132,20 @@ app.post("/reviews", async (req, res) => {
       success: true,
       error: err.message,
     });
+  }
+});
+
+//get reviews by serviceId
+
+app.get("/reviews/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+    const result = await plumberReviews.find({ serviceId: id }).toArray();
+    console.log(result);
+    res.send({ data: result });
+  } catch (err) {
+    console.log(err);
   }
 });
 

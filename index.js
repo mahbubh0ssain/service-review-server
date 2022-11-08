@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -59,6 +59,24 @@ app.get("/service", async (req, res) => {
     res.send({
       success: true,
       data: services,
+    });
+  } catch (err) {
+    res.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
+//get data by id
+app.get("/all-service/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const service = await plumberServices.findOne({ _id: ObjectId(id) });
+    console.log(service);
+    res.send({
+      success: true,
+      data: service,
     });
   } catch (err) {
     res.send({

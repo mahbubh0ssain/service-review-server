@@ -140,12 +140,76 @@ app.post("/reviews", async (req, res) => {
 app.get("/reviews/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
-    const result = await plumberReviews.find({ serviceId: id }).toArray();
-    console.log(result);
-    res.send({ data: result });
+    const result = await plumberReviews
+      .find({ serviceId: id })
+      .sort({ currentDate: -1 })
+      .toArray();
+    if (result) {
+      res.send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Reviews not found",
+      });
+    }
   } catch (err) {
     console.log(err);
+    res.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
+//get review by user email
+
+app.get("/my-reviews", async (req, res) => {
+  try {
+    const { email } = req.query;
+    const result = await plumberReviews.find({ userEmail: email }).toArray();
+    if (result) {
+      res.send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Reviews not found",
+      });
+    }
+  } catch (err) {
+    res.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
+//delete review
+app.delete("/delete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await plumberReviews.deleteOne({ _id: ObjectId(id) });
+    if (result.deletedCount) {
+      res.send({
+        success: true,
+        data: result,
+      });
+    } else {
+      res.send({
+        success: false,
+        message: "Can not delete this review",
+      });
+    }
+  } catch (err) {
+    res.send({
+      success: false,
+      error: err.message,
+    });
   }
 });
 

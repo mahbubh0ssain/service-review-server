@@ -213,6 +213,36 @@ app.delete("/delete/:id", async (req, res) => {
   }
 });
 
+// update review
+app.patch("/update/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const isExist = await plumberReviews.findOne({ _id: ObjectId(id) });
+    if (isExist) {
+      const result = await plumberReviews.updateOne(
+        { _id: ObjectId(id) },
+        { $set: req.body }
+      );
+      if (result.modifiedCount) {
+        res.send({
+          success: true,
+          data: result,
+        });
+      } else {
+        req.send({
+          success: false,
+          message: "Can nor update review",
+        });
+      }
+    }
+  } catch (err) {
+    req.send({
+      success: false,
+      error: err.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log("Mr. Plumber server is running on port", port);
 });

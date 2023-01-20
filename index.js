@@ -168,12 +168,13 @@ app.get("/reviews/:id", async (req, res) => {
 
 //verify JWT
 const verifyJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req?.headers?.authorization;
   if (!authHeader) {
     return res.status(401).send({ message: "Unauthorized access." });
   }
   const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).send({ message: "Access forbidden" });
     }
@@ -188,11 +189,11 @@ app.get("/my-reviews", verifyJWT, async (req, res) => {
   try {
     const decoded = req.decoded;
     let query = {};
-    if (decoded.email !== req.query.email) {
+    if (decoded?.email !== req?.query?.email) {
       return res.status(403).send({ message: "Access forbidden" });
     }
     if (req.query?.email) {
-      query = { userEmail: req.query?.email };
+      query = { userEmail: req?.query?.email };
     }
     const result = await plumberReviews.find(query).sort({ _id: -1 }).toArray();
     if (result) {
@@ -270,6 +271,7 @@ app.patch("/update/:id", async (req, res) => {
 
 const UsersCollection = client.db("mrPlumber").collection("usersCollection");
 
+// save userInfo and send  token
 app.put("/saveUser/:email", async (req, res) => {
   const email = req.params.email;
 
@@ -290,6 +292,27 @@ app.put("/saveUser/:email", async (req, res) => {
   );
   const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
   res.send({ result, token });
+});
+
+// get user role
+app.get("/user", verifyJWT, async (req, res) => {
+  try {
+    const decoded = req?.decoded;
+    let query = {};
+    if (decoded !== req?.query?.email) {
+      return res.status(403).send({ message: "Access forbidden" });
+    }
+    if (req?.query?.email) {
+      query = { email: req?.query?.email };
+    }
+    const result = await UsersCollection.findOne(query);
+    res.send({ success: true, result });
+  } catch (err) {
+    req.send({
+      success: false,
+      error: err.message,
+    });
+  }
 });
 
 app.listen(port, () => {

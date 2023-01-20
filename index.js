@@ -40,7 +40,7 @@ connectDb();
 app.get("/all-service", async (req, res) => {
   try {
     const services = await plumberServices.find({}).toArray();
-    count = await plumberServices.countDocuments();
+    const count = await plumberServices.countDocuments();
     res.send({
       success: true,
       count: count,
@@ -268,22 +268,28 @@ app.patch("/update/:id", async (req, res) => {
   }
 });
 
-//JWT token
+const UsersCollection = client.db("mrPlumber").collection("usersCollection");
 
-app.post("/jwt", async (req, res) => {
-  try {
-    const email = req.body;
-    const token = jwt.sign(email, process.env.ACCESS_TOKEN);
-    res.send({
-      success: true,
-      data: token,
-    });
-  } catch (err) {
-    res.send({
-      success: false,
-      error: err.message,
-    });
-  }
+app.put("/saveUser/:email", async (req, res) => {
+  const email = req.params.email;
+
+  // const filter = { email: email };
+  // const options = { upsert: true };
+  // const updateDoc = {
+  //   $set: req?.body,
+  // };
+
+  const result = await UsersCollection.updateOne(
+    { email: email },
+    {
+      $set: req?.body,
+    },
+    {
+      upsert: true,
+    }
+  );
+  const token = jwt.sign(email, process.env.ACCESS_TOKEN_SECRET);
+  res.send({ result, token });
 });
 
 app.listen(port, () => {
